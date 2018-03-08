@@ -62,15 +62,16 @@ namespace TabataTimerApplication.UI.Forms
                 _tabataTimer.OnStopped += OnStopped;
                 _tabataTimer.OnFinished += OnFinished;
 
-                _mainLogProvider.Log(LogItem.Create("Started timer."));
+                var totalExpectedTime = _tabataTimer.TotalWorkoutTime + _tabataTimer.PreparationTime;
                 var entries = new[]
                 {
                     new LogEntry("Expected to take ", true, false),
-                    new LogEntry($"{(_tabataTimer.TotalWorkoutTime + _tabataTimer.PreparationTime).TotalSeconds:N0}", false, false, SystemColors.Highlight),
+                    new LogEntry($"{totalExpectedTime.TotalSeconds:N0}", false, false, SystemColors.Highlight),
                     new LogEntry(" seconds.", false),
                 };
                 _mainLogProvider.Log(LogItem.Create(entries));
 
+                _mainLogProvider.Log(LogItem.Create("Started timer."));
                 await _tabataTimer.Start();
             }
             else
