@@ -32,7 +32,7 @@ namespace TabataTimerApplication.Core.Helpers
             get
             {
                 var totalTimeOn = TimeSpan.FromTicks(TimeOn.Ticks * Rounds);
-                var totalTimeOff = TimeSpan.FromTicks(TimeOff.Ticks * Rounds);
+                var totalTimeOff = TimeSpan.FromTicks(TimeOff.Ticks * (Rounds - 1));
 
                 return totalTimeOn + totalTimeOff;
             }
