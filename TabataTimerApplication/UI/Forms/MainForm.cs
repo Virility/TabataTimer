@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Drawing;
-using System.Media;
 using System.Windows.Forms;
 using TabataTimerApplication.Core.Helpers;
 using TabataTimerApplication.UI.Helpers;
@@ -123,11 +122,14 @@ namespace TabataTimerApplication.UI.Forms
                 new LogEntry(" seconds.", false),
             };
             _mainLogProvider.Log(LogItem.Create(entries));
+
+            bStart.Text = "Stop";
         }
 
         private void OnFinished(TimeSpan time)
         {
             Console.Beep(1500, 1000);
+
             var entries = new[]
             {
                 new LogEntry("Finished in ", true, false),
@@ -135,6 +137,8 @@ namespace TabataTimerApplication.UI.Forms
                 new LogEntry(" seconds.", false),
             };
             _mainLogProvider.Log(LogItem.Create(entries));
+
+            bStart.Text = "Stop";
         }
     }
 }
