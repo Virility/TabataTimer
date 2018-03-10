@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace TabataTimerApplication.Core.Helpers
 {
-    public class TabataTimer
+    public class TabataTimer : IDisposable
     {
-        private readonly CancellationTokenSource _cancellationTokenSource;
-        private CancellationToken _cancellationToken;
+        private CancellationTokenSource _cancellationTokenSource;
 
         public delegate void OnPreparingStoppedOrFinshedHandler(TimeSpan time);
         public event OnPreparingStoppedOrFinshedHandler OnPreparing;
@@ -40,9 +39,6 @@ namespace TabataTimerApplication.Core.Helpers
 
         public TabataTimer()
         {
-            _cancellationTokenSource = new CancellationTokenSource();
-            _cancellationToken = _cancellationTokenSource.Token;
-
             TimeOn = new TimeSpan(0, 0, 10);
             TimeOff = new TimeSpan(0, 0, 10);
             PreparationTime = new TimeSpan(0, 0, 10);
@@ -50,29 +46,29 @@ namespace TabataTimerApplication.Core.Helpers
 
         public async Task Start()
         {
-            _cancellationToken = _cancellationTokenSource.Token;
+            _cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = _cancellationTokenSource.Token;
 
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            var stopwatch = Stopwatch.StartNew();
 
             try
             {
                 if (PreparationTime.Seconds != 0)
                 {
                     OnPreparing?.Invoke(PreparationTime);
-                    await Task.Delay(PreparationTime, _cancellationToken);
+                    await Task.Delay(PreparationTime, cancellationToken);
                 }
             
                 for (var round = 1; round < Rounds + 1; round++)
                 {
                     OnRoundStarted?.Invoke(round, TimeOn, stopwatch.Elapsed);
-                    await Task.Delay(TimeOn, _cancellationToken);
+                    await Task.Delay(TimeOn, cancellationToken);
 
                     if (round == Rounds)
                         break;
 
                     OnRoundResting?.Invoke(round, TimeOff, stopwatch.Elapsed);
-                    await Task.Delay(TimeOff, _cancellationToken);
+                    await Task.Delay(TimeOff, cancellationToken);
                 }
             }
             catch (Exception)
@@ -84,11 +80,27 @@ namespace TabataTimerApplication.Core.Helpers
 
             stopwatch.Stop();
             OnFinished?.Invoke(stopwatch.Elapsed);
+
+            Dispose();
         }
 
         public void Stop()
         {
-            _cancellationTokenSource.Cancel();
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (_cancellationTokenSource == null)
+                return;
+
+            try
+            {
+                _cancellationTokenSource.Cancel();
+            }
+            catch (AggregateException) { }
+
+            _cancellationTokenSource.Dispose();
         }
     }
 }
