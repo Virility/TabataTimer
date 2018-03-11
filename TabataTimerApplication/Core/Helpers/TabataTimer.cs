@@ -10,14 +10,14 @@ namespace TabataTimerApplication.Core.Helpers
     {
         private CancellationTokenSource _cancellationTokenSource;
 
-        public delegate void OnPreparingStoppedOrFinshedHandler(TimeSpan time);
-        public event OnPreparingStoppedOrFinshedHandler OnPreparing;
-        public event OnPreparingStoppedOrFinshedHandler OnStopped;
-        public event OnPreparingStoppedOrFinshedHandler OnFinished;
+        public delegate void ReportTimeHandler(TimeSpan time);
+        public event ReportTimeHandler OnPreparing;
+        public event ReportTimeHandler OnStopped;
+        public event ReportTimeHandler OnFinished;
 
-        public delegate void OnRoundStartedAndRestingHandler(ReportUpdateEventArgs eventArgs);
-        public event OnRoundStartedAndRestingHandler OnRoundStarted;
-        public event OnRoundStartedAndRestingHandler OnRoundResting;
+        public delegate void ReportUpdateHandler(ReportUpdateEventArgs eventArgs);
+        public event ReportUpdateHandler OnRoundStarted;
+        public event ReportUpdateHandler OnRoundResting;
 
         public int Rounds { get; set; } = 10;
 
