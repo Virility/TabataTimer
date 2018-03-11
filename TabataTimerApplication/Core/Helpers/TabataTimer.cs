@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using TabataTimerApplication.Core.Models;
 
 namespace TabataTimerApplication.Core.Helpers
 {
@@ -14,7 +15,7 @@ namespace TabataTimerApplication.Core.Helpers
         public event OnPreparingStoppedOrFinshedHandler OnStopped;
         public event OnPreparingStoppedOrFinshedHandler OnFinished;
 
-        public delegate void OnRoundStartedAndRestingHandler(int round, TimeSpan time, TimeSpan elapsed);
+        public delegate void OnRoundStartedAndRestingHandler(ReportUpdateEventArgs eventArgs);
         public event OnRoundStartedAndRestingHandler OnRoundStarted;
         public event OnRoundStartedAndRestingHandler OnRoundResting;
 
@@ -61,13 +62,15 @@ namespace TabataTimerApplication.Core.Helpers
             
                 for (var round = 1; round < Rounds + 1; round++)
                 {
-                    OnRoundStarted?.Invoke(round, TimeOn, stopwatch.Elapsed);
+                    var eventArg = new ReportUpdateEventArgs(round, TimeOn, stopwatch.Elapsed);
+                    OnRoundStarted?.Invoke(eventArg);
                     await Task.Delay(TimeOn, cancellationToken);
 
                     if (round == Rounds)
                         break;
 
-                    OnRoundResting?.Invoke(round, TimeOff, stopwatch.Elapsed);
+                    eventArg = new ReportUpdateEventArgs(round, TimeOff, stopwatch.Elapsed);
+                    OnRoundResting?.Invoke(eventArg);
                     await Task.Delay(TimeOff, cancellationToken);
                 }
             }
@@ -97,7 +100,6 @@ namespace TabataTimerApplication.Core.Helpers
             try
             {
                 _cancellationTokenSource.Cancel();
-        
             }
             catch (AggregateException) { }
 

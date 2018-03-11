@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using TabataTimerApplication.Core.Helpers;
+using TabataTimerApplication.Core.Models;
 using TabataTimerApplication.UI.Helpers;
 using TabataTimerApplication.UI.Models;
 
@@ -92,31 +93,31 @@ namespace TabataTimerApplication.UI.Forms
             _mainLogProvider.Log(LogItem.Create(entries));
         }
 
-        private void OnRoundStarted(int round, TimeSpan time, TimeSpan elapsed)
+        private void OnRoundStarted(ReportUpdateEventArgs eventArgs)
         {
             Console.Beep(3000, 200);
 
             var entries = new[]
             {
                 new LogEntry("Started round ", true, false),
-                new LogEntry($"#{round}", false, false, SystemColors.Highlight),
+                new LogEntry($"#{eventArgs.Round}", false, false, SystemColors.Highlight),
                 new LogEntry(" for ", false, false),
-                new LogEntry($"{time.TotalSeconds:N0}", false, false, SystemColors.Highlight),
+                new LogEntry($"{eventArgs.Time.TotalSeconds:N0}", false, false, SystemColors.Highlight),
                 new LogEntry(" seconds.", false),
             };
             _mainLogProvider.Log(LogItem.Create(entries));
         }
 
-        private void OnRoundResting(int round, TimeSpan time, TimeSpan elapsed)
+        private void OnRoundResting(ReportUpdateEventArgs eventArgs)
         {
             Console.Beep(3000, 500);
 
             var entries = new[]
             {
                 new LogEntry("Resting after round ", true, false),
-                new LogEntry($"#{round}", false, false, SystemColors.Highlight),
+                new LogEntry($"#{eventArgs.Round}", false, false, SystemColors.Highlight),
                 new LogEntry(" for ", false, false),
-                new LogEntry($"{time.TotalSeconds:N0}", false, false, SystemColors.Highlight),
+                new LogEntry($"{eventArgs.Time.TotalSeconds:N0}", false, false, SystemColors.Highlight),
                 new LogEntry(" seconds.", false),
             };
             _mainLogProvider.Log(LogItem.Create(entries));
