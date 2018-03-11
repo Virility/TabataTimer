@@ -75,8 +75,6 @@ namespace TabataTimerApplication.Core.Helpers
             {
                 stopwatch.Stop();
                 OnStopped?.Invoke(stopwatch.Elapsed);
-                
-                Dispose();
                 return;
             }
 
@@ -99,6 +97,7 @@ namespace TabataTimerApplication.Core.Helpers
             try
             {
                 _cancellationTokenSource.Cancel();
+        
             }
             catch (AggregateException) { }
 
