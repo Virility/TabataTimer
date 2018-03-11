@@ -132,7 +132,7 @@ namespace TabataTimerApplication.UI.Forms
             };
             _mainLogProvider.Log(LogItem.Create(entries));
 
-            bStart.Text = "Stop";
+            bStart.Text = "Start";
         }
 
         private void OnFinished(TimeSpan time)
@@ -147,7 +147,7 @@ namespace TabataTimerApplication.UI.Forms
             };
             _mainLogProvider.Log(LogItem.Create(entries));
 
-            bStart.Text = "Stop";
+            bStart.Text = "Start";
         }
     }
 }
