@@ -23,27 +23,31 @@ namespace TabataTimerApplication.UI.Forms
 
         private TabataTimer _tabataTimer;
 
-        public MainForm (INIFile configurationFile)
+        public MainForm(INIFile configurationFile)
         {
             InitializeComponent();
             InvalidateLabels();
 
-            if (configurationFile != null)
-            {
-                if (int.TryParse(configurationFile.IniReadValue("Main", "Rounds"), out var tempVariable))
-                    tbRounds.Value = tempVariable;
-
-                if (int.TryParse(configurationFile.IniReadValue("Main", "PreparationTime"), out tempVariable))
-                    tbPreparation.Value = tempVariable;
-
-                if (int.TryParse(configurationFile.IniReadValue("Main", "TimeOn"), out tempVariable))
-                    tbTimeOn.Value = tempVariable;
-
-                if (int.TryParse(configurationFile.IniReadValue("Main", "TimeOff"), out tempVariable))
-                    tbTimeOff.Value = tempVariable;
-            }
-
             _mainLogProvider = new RichTextBoxLogProvider(rtbMain);
+            ProcessConfigurationFile(configurationFile);
+        }
+
+        private void ProcessConfigurationFile(INIFile configurationFile)
+        {
+            if (configurationFile == null)
+                return;
+
+            if (int.TryParse(configurationFile.IniReadValue("Main", "Rounds"), out var tempVariable))
+                tbRounds.Value = tempVariable;
+
+            if (int.TryParse(configurationFile.IniReadValue("Main", "PreparationTime"), out tempVariable))
+                tbPreparation.Value = tempVariable;
+
+            if (int.TryParse(configurationFile.IniReadValue("Main", "TimeOn"), out tempVariable))
+                tbTimeOn.Value = tempVariable;
+
+            if (int.TryParse(configurationFile.IniReadValue("Main", "TimeOff"), out tempVariable))
+                tbTimeOff.Value = tempVariable;
         }
 
         private void TrackBarValuesChanged(object sender, EventArgs e)
