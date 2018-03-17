@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using TabataTimerApplication.Core.Helpers;
 using TabataTimerApplication.Core.Models;
@@ -22,10 +23,25 @@ namespace TabataTimerApplication.UI.Forms
 
         private TabataTimer _tabataTimer;
 
-        public MainForm()
+        public MainForm (INIFile configurationFile)
         {
             InitializeComponent();
             InvalidateLabels();
+
+            if (configurationFile != null)
+            {
+                if (int.TryParse(configurationFile.IniReadValue("Main", "Rounds"), out var tempVariable))
+                    tbRounds.Value = tempVariable;
+
+                if (int.TryParse(configurationFile.IniReadValue("Main", "PreparationTime"), out tempVariable))
+                    tbPreparation.Value = tempVariable;
+
+                if (int.TryParse(configurationFile.IniReadValue("Main", "TimeOn"), out tempVariable))
+                    tbTimeOn.Value = tempVariable;
+
+                if (int.TryParse(configurationFile.IniReadValue("Main", "TimeOff"), out tempVariable))
+                    tbTimeOff.Value = tempVariable;
+            }
 
             _mainLogProvider = new RichTextBoxLogProvider(rtbMain);
         }
@@ -149,6 +165,18 @@ namespace TabataTimerApplication.UI.Forms
             _mainLogProvider.Log(LogItem.Create(entries));
 
             bStart.Text = "Start";
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var finalPath = Path.Combine(desktopPath, "default.ini");
+
+            var configurationFile = new INIFile(finalPath);
+            configurationFile.IniWriteValue("Main", "Rounds", tbRounds.Value.ToString());
+            configurationFile.IniWriteValue("Main", "PreparationTime", tbPreparation.Value.ToString());
+            configurationFile.IniWriteValue("Main", "TimeOn", tbTimeOn.Value.ToString());
+            configurationFile.IniWriteValue("Main", "TimeOff", tbTimeOff.Value.ToString());
         }
     }
 }

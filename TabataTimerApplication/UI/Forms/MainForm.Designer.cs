@@ -14,7 +14,10 @@
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
+            {
                 components.Dispose();
+                _tabataTimer.Dispose();
+            }
 
             base.Dispose(disposing);
         }
@@ -162,6 +165,7 @@
             this.Font = new System.Drawing.Font("Verdana", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "MainForm";
             this.Text = "MainForm";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.tbTimeOff)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.tbTimeOn)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.tbPreparation)).EndInit();

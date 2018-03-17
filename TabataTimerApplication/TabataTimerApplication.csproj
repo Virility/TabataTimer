@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Helpers\INIFile.cs" />
     <Compile Include="Core\Helpers\TabataTimer.cs" />
     <Compile Include="Core\Models\ReportUpdateEventArgs.cs" />
     <Compile Include="Program.cs" />
