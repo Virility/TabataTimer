@@ -1,29 +1,29 @@
 using System;
 using System.Drawing;
-using System.IO;
 using System.Windows.Forms;
-using TabataTimerApplication.Core.Helpers;
-using TabataTimerApplication.Core.Models;
-using TabataTimerApplication.UI.Helpers;
-using TabataTimerApplication.UI.Models;
+using KegelTimerApplication.Core.Helpers.Timers;
+using KegelTimerApplication.Core.Models;
+using KegelTimerApplication.UI.Helpers;
+using KegelTimerApplication.UI.Models;
 
-namespace TabataTimerApplication.UI.Forms
+namespace KegelTimerApplication.UI.Forms
 {
     public partial class MainForm : Form
     {
         private readonly string[] _labelFormats =
         {
             "Rounds ({0})",
-            "Preparation ({0} seconds)",
-            "Time On ({0} seconds)",
-            "Time Off ({0} seconds)"
+            "Preparation Time ({0} seconds)",
+            "On Time ({0} seconds)",
+            "Off Time ({0} seconds)",
+            "Last Round Time ({0} seconds)"
         };
 
         private readonly RichTextBoxLogProvider _mainLogProvider;
 
-        private TabataTimer _tabataTimer;
+        private KegelTimer _kegelTimer;
 
-        public MainForm(INIFile configurationFile)
+        public MainForm(IniFile configurationFile)
         {
             InitializeComponent();
             InvalidateLabels();
@@ -32,35 +32,38 @@ namespace TabataTimerApplication.UI.Forms
             ProcessConfigurationFile(configurationFile);
         }
 
-        private void ProcessConfigurationFile(INIFile configurationFile)
+        private void ProcessConfigurationFile(IniFile configurationFile)
         {
             if (configurationFile == null)
                 return;
 
-            if (int.TryParse(configurationFile.IniReadValue("Main", "Rounds"), out var tempVariable))
+            if (int.TryParse(configurationFile.IniReadValue("Kegel", "Rounds"), out var tempVariable))
                 tbRounds.Value = tempVariable;
 
-            if (int.TryParse(configurationFile.IniReadValue("Main", "PreparationTime"), out tempVariable))
-                tbPreparation.Value = tempVariable;
+            if (int.TryParse(configurationFile.IniReadValue("Kegel", "PreparationTime"), out tempVariable))
+                tbPreparationTime.Value = tempVariable;
 
-            if (int.TryParse(configurationFile.IniReadValue("Main", "TimeOn"), out tempVariable))
-                tbTimeOn.Value = tempVariable;
+            if (int.TryParse(configurationFile.IniReadValue("Kegel", "OnTime"), out tempVariable))
+                tbOnTime.Value = tempVariable;
 
-            if (int.TryParse(configurationFile.IniReadValue("Main", "TimeOff"), out tempVariable))
-                tbTimeOff.Value = tempVariable;
-        }
+            if (int.TryParse(configurationFile.IniReadValue("Kegel", "OffTime"), out tempVariable))
+                tbOffTime.Value = tempVariable;
 
-        private void TrackBarValuesChanged(object sender, EventArgs e)
-        {
-            InvalidateLabels();
+            if (!bool.TryParse(configurationFile.IniReadValue("LongerTime", "Enabled"), out var tempVariable2))
+                return;
+
+            ToggleLongerLastRoundTime(!tempVariable2);
+            if (int.TryParse(configurationFile.IniReadValue("LongerTime", "Time"), out tempVariable))
+                tbLongerLastRoundTime.Value = tempVariable;
         }
 
         private void InvalidateLabels()
         {
             lRounds.Text = string.Format(_labelFormats[0], tbRounds.Value);
-            lPreparation.Text = string.Format(_labelFormats[1], tbPreparation.Value);
-            lTimeOn.Text = string.Format(_labelFormats[2], tbTimeOn.Value);
-            lTimeOff.Text = string.Format(_labelFormats[3], tbTimeOff.Value);
+            lPreparationTime.Text = string.Format(_labelFormats[1], tbPreparationTime.Value);
+            lOnTime.Text = string.Format(_labelFormats[2], tbOnTime.Value);
+            lOffTime.Text = string.Format(_labelFormats[3], tbOffTime.Value);
+            lLongerLastRoundTime.Text = string.Format(_labelFormats[4], tbLongerLastRoundTime.Value);
         }
 
         private async void bStart_Click(object sender, EventArgs e)
@@ -69,21 +72,35 @@ namespace TabataTimerApplication.UI.Forms
             {
                 bStart.Text = "Stop";
 
-                _tabataTimer = new TabataTimer
+                if (lLongerLastRoundTime.Enabled)
                 {
-                    Rounds = tbRounds.Value,
-                    PreparationTime = new TimeSpan(0, 0, tbPreparation.Value),
-                    TimeOn = new TimeSpan(0, 0, tbTimeOn.Value),
-                    TimeOff = new TimeSpan(0, 0, tbTimeOff.Value),
-                };
+                    _kegelTimer = new LongerLastRoundTimer
+                    {
+                        Rounds = tbRounds.Value,
+                        PreparationTime = new TimeSpan(0, 0, tbPreparationTime.Value),
+                        TimeOn = new TimeSpan(0, 0, tbOnTime.Value),
+                        TimeOff = new TimeSpan(0, 0, tbOffTime.Value),
+                        LastRoundTime = new TimeSpan(0, 0, tbLongerLastRoundTime.Value)
+                    };
+                }
+                else
+                {
+                    _kegelTimer = new NormalTimer
+                    {
+                        Rounds = tbRounds.Value,
+                        PreparationTime = new TimeSpan(0, 0, tbPreparationTime.Value),
+                        TimeOn = new TimeSpan(0, 0, tbOnTime.Value),
+                        TimeOff = new TimeSpan(0, 0, tbOffTime.Value)
+                    };
+                }
 
-                _tabataTimer.OnPreparing += OnPreparing;
-                _tabataTimer.OnRoundStarted += OnRoundStarted;
-                _tabataTimer.OnRoundResting += OnRoundResting;
-                _tabataTimer.OnStopped += OnStopped;
-                _tabataTimer.OnFinished += OnFinished;
+                _kegelTimer.Preparing += OnPreparing;
+                _kegelTimer.RoundStarted += OnRoundStarted;
+                _kegelTimer.RoundResting += OnRoundResting;
+                _kegelTimer.Stopped += OnStopped;
+                _kegelTimer.Finished += OnFinished;
 
-                var totalExpectedTime = _tabataTimer.TotalWorkoutTime + _tabataTimer.PreparationTime;
+                var totalExpectedTime = _kegelTimer.TotalWorkoutTime + _kegelTimer.PreparationTime;
                 var entries = new[]
                 {
                     new LogEntry("Expected to take ", true, false),
@@ -93,13 +110,41 @@ namespace TabataTimerApplication.UI.Forms
                 _mainLogProvider.Log(LogItem.Create(entries));
 
                 _mainLogProvider.Log(LogItem.Create("Started timer."));
-                await _tabataTimer.Start();
+                await _kegelTimer.Start();
             }
             else
             {
-                _tabataTimer.Stop();
+                _kegelTimer.Stop();
                 bStart.Text = "Start";
             }
+        }
+
+        private void TrackBarValuesChanged(object sender, EventArgs e)
+        {
+            InvalidateLabels();
+        }
+
+        private void ToggleLongerLastRoundTime(bool enabled)
+        {
+            if (enabled)
+            {
+                lLongerLastRoundTime.Enabled =
+                    tbLongerLastRoundTime.Enabled = false;
+                lLongerLastRoundTimeToggle.Text = "Enable";
+                lLongerLastRoundTimeToggle.ForeColor = SystemColors.ControlDark;
+            }
+            else
+            {
+                lLongerLastRoundTime.Enabled =
+                    tbLongerLastRoundTime.Enabled = true;
+                lLongerLastRoundTimeToggle.Text = "Disable";
+                lLongerLastRoundTimeToggle.ForeColor = SystemColors.ControlText;
+            }
+        }
+
+        private void lLongerLastRoundTimeToggle_Click(object sender, EventArgs e)
+        {
+            ToggleLongerLastRoundTime(lLongerLastRoundTime.Enabled);
         }
 
         private void OnPreparing(TimeSpan time)
@@ -108,7 +153,7 @@ namespace TabataTimerApplication.UI.Forms
             {
                 new LogEntry("Preparing for ", true, false),
                 new LogEntry($"{time.TotalSeconds:N0}", false, false, SystemColors.Highlight),
-                new LogEntry(" seconds.", false),
+                new LogEntry(" seconds.", false)
             };
             _mainLogProvider.Log(LogItem.Create(entries));
         }
@@ -123,7 +168,7 @@ namespace TabataTimerApplication.UI.Forms
                 new LogEntry($"#{eventArgs.Round}", false, false, SystemColors.Highlight),
                 new LogEntry(" for ", false, false),
                 new LogEntry($"{eventArgs.Time.TotalSeconds:N0}", false, false, SystemColors.Highlight),
-                new LogEntry(" seconds.", false),
+                new LogEntry(" seconds.", false)
             };
             _mainLogProvider.Log(LogItem.Create(entries));
         }
@@ -138,7 +183,7 @@ namespace TabataTimerApplication.UI.Forms
                 new LogEntry($"#{eventArgs.Round}", false, false, SystemColors.Highlight),
                 new LogEntry(" for ", false, false),
                 new LogEntry($"{eventArgs.Time.TotalSeconds:N0}", false, false, SystemColors.Highlight),
-                new LogEntry(" seconds.", false),
+                new LogEntry(" seconds.", false)
             };
             _mainLogProvider.Log(LogItem.Create(entries));
         }
@@ -149,7 +194,7 @@ namespace TabataTimerApplication.UI.Forms
             {
                 new LogEntry("Stopped after ", true, false),
                 new LogEntry($"{time.TotalSeconds:N0}", false, false, SystemColors.Highlight),
-                new LogEntry(" seconds.", false),
+                new LogEntry(" seconds.", false)
             };
             _mainLogProvider.Log(LogItem.Create(entries));
 
@@ -164,7 +209,7 @@ namespace TabataTimerApplication.UI.Forms
             {
                 new LogEntry("Finished in ", true, false),
                 new LogEntry($"{time.TotalSeconds:N0}", false, false, SystemColors.Highlight),
-                new LogEntry(" seconds.", false),
+                new LogEntry(" seconds.", false)
             };
             _mainLogProvider.Log(LogItem.Create(entries));
 
@@ -173,14 +218,13 @@ namespace TabataTimerApplication.UI.Forms
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            var finalPath = Path.Combine(desktopPath, "default.ini");
-
-            var configurationFile = new INIFile(finalPath);
-            configurationFile.IniWriteValue("Main", "Rounds", tbRounds.Value.ToString());
-            configurationFile.IniWriteValue("Main", "PreparationTime", tbPreparation.Value.ToString());
-            configurationFile.IniWriteValue("Main", "TimeOn", tbTimeOn.Value.ToString());
-            configurationFile.IniWriteValue("Main", "TimeOff", tbTimeOff.Value.ToString());
+            var configurationFile = new IniFile(Config.ConfigurationFilePath);
+            configurationFile.IniWriteValue("Kegel", "Rounds", tbRounds.Value.ToString());
+            configurationFile.IniWriteValue("Kegel", "PreparationTime", tbPreparationTime.Value.ToString());
+            configurationFile.IniWriteValue("Kegel", "OnTime", tbOnTime.Value.ToString());
+            configurationFile.IniWriteValue("Kegel", "OffTime", tbOffTime.Value.ToString());
+            configurationFile.IniWriteValue("LongerTime", "Enabled", lLongerLastRoundTimeToggle.Enabled.ToString());
+            configurationFile.IniWriteValue("LongerTime", "Time", tbLongerLastRoundTime.Value.ToString());
         }
     }
 }

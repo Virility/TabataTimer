@@ -7,8 +7,8 @@
     <ProjectGuid>{83A76E3E-FBC7-49E1-A6D2-16EDE6FF526F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TabataTimerApplication</RootNamespace>
-    <AssemblyName>TabataTimerApplication</AssemblyName>
+    <RootNamespace>KegelTimerApplication</RootNamespace>
+    <AssemblyName>KegelTimerApplication</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -45,8 +45,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\Helpers\INIFile.cs" />
-    <Compile Include="Core\Helpers\TabataTimer.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="Core\Models\IniFile.cs" />
+    <Compile Include="Core\Helpers\Timers\LongerLastRoundTimer.cs" />
+    <Compile Include="Core\Helpers\Timers\NormalTimer.cs" />
+    <Compile Include="Core\Helpers\Timers\KegelTimer.cs" />
     <Compile Include="Core\Models\ReportUpdateEventArgs.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -68,6 +71,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="UI\Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace TabataTimerApplication.UI.Models
+namespace KegelTimerApplication.UI.Models
 {
     public class LogItem
     {

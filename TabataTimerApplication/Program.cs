@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
-using TabataTimerApplication.Core.Helpers;
-using TabataTimerApplication.UI.Forms;
+using KegelTimerApplication.Core.Models;
+using KegelTimerApplication.UI.Forms;
 
-namespace TabataTimerApplication
+namespace KegelTimerApplication
 {
     static class Program
     {
@@ -17,16 +17,13 @@ namespace TabataTimerApplication
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            INIFile configurationFile = null;
+            IniFile configurationFile = null;
             if (args.Length != 0 && File.Exists(args[0]))
-                configurationFile = new INIFile(args[0]);
+                configurationFile = new IniFile(args[0]);
             else
             {
-                var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                var configurationFilePath = Path.Combine(desktopPath, "default.ini");
-
-                if (File.Exists(configurationFilePath))
-                    configurationFile = new INIFile(configurationFilePath);
+                if (File.Exists(Config.ConfigurationFilePath))
+                    configurationFile = new IniFile(Config.ConfigurationFilePath);
             }
             Application.Run(new MainForm(configurationFile));
         }

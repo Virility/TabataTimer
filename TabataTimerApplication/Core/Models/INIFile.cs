@@ -1,9 +1,9 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace TabataTimerApplication.Core.Helpers
+namespace KegelTimerApplication.Core.Models
 {
-    public class INIFile
+    public class IniFile
     {
         /// <summary>
         /// Initialization file.
@@ -20,7 +20,7 @@ namespace TabataTimerApplication.Core.Helpers
         /// Set location for the initialization file path.
         /// </summary>
         /// <param name="path">INI file path.</param>
-        public INIFile(string path)
+        public IniFile(string path)
         {
             Path = path;
         }

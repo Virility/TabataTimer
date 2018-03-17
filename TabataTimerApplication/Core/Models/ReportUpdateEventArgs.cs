@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TabataTimerApplication.Core.Models
+namespace KegelTimerApplication.Core.Models
 {
     public class ReportUpdateEventArgs : EventArgs
     {
