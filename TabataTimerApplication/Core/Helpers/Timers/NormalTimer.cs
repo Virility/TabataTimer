@@ -8,7 +8,7 @@ namespace KegelTimerApplication.Core.Helpers.Timers
 {
     public class NormalTimer : KegelTimer
     {
-        public new TimeSpan TotalWorkoutTime
+        public override TimeSpan TotalWorkoutTime
         {
             get
             {
