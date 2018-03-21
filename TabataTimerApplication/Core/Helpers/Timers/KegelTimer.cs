@@ -26,7 +26,7 @@ namespace KegelTimerApplication.Core.Helpers.Timers
 
         public TimeSpan PreparationTime { get; set; }
 
-        public TimeSpan TotalWorkoutTime { get; set; }
+        public virtual TimeSpan TotalWorkoutTime { get; }
 
         protected KegelTimer()
         {
