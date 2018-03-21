@@ -10,11 +10,11 @@ namespace KegelTimerApplication.Core.Helpers.Timers
     {
         public TimeSpan LastRoundTime { get; set; }
 
-        public new TimeSpan TotalWorkoutTime
+        public override TimeSpan TotalWorkoutTime
         {
             get
             {
-                var totalTimeOn = TimeSpan.FromTicks(TimeOn.Ticks * Rounds - 1) + TimeSpan.FromTicks(LastRoundTime.Ticks);
+                var totalTimeOn = TimeSpan.FromTicks(TimeOn.Ticks * (Rounds - 1) + LastRoundTime.Ticks);
                 var totalTimeOff = TimeSpan.FromTicks(TimeOff.Ticks * (Rounds - 1));
 
                 return totalTimeOn + totalTimeOff;
@@ -56,7 +56,7 @@ namespace KegelTimerApplication.Core.Helpers.Timers
                     await Task.Delay(TimeOff, cancellationToken);
                 }
 
-                eventArgs = new ReportUpdateEventArgs(Rounds - 1, LastRoundTime, stopwatch.Elapsed);
+                eventArgs = new ReportUpdateEventArgs(Rounds, LastRoundTime, stopwatch.Elapsed);
                 OnRoundStarted(eventArgs);
                 await Task.Delay(LastRoundTime, cancellationToken);
             }
